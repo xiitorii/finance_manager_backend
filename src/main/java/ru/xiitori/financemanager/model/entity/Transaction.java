@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import ru.xiitori.financemanager.model.enums.TransactionType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
