@@ -8,7 +8,7 @@ import ru.xiitori.financemanager.model.entity.Transaction;
 @Mapper(componentModel = "spring")
 public interface TransactionMapper {
 
-    @Mapping(target = "userId", source="user.id")
+    @Mapping(target = "userId", source = "transaction.user.id")
     TransactionResponseDTO mapToDto(Transaction transaction);
 //
 //    Transaction mapToEntity(TransactionRequestDTO dto);
