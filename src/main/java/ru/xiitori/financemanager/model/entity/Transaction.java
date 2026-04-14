@@ -33,6 +33,6 @@ public class Transaction {
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(updatable = false)
+    @Column
     private LocalDateTime updatedAt;
 }
