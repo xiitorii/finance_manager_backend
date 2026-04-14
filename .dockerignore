@@ -1,0 +1,26 @@
+# IDE
+.idea/
+*.iml
+
+# Build
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Environment
+.env
+
+# Git
+.git
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Maven
+.mvn
+!**/.mvn/wrapper/**
+
+# Logs
+test-results/
+test-output/
+*.log
