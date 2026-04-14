@@ -21,8 +21,8 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable) // временно
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().authenticated())
+                        //.requestMatchers("/api/auth/**").permitAll()
+                        .anyRequest().permitAll()) // TODO: убрать после реализации авторизации
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .userDetailsService(userDetailsService);
