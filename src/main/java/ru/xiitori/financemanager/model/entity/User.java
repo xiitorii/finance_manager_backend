@@ -2,6 +2,7 @@ package ru.xiitori.financemanager.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,8 +25,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    //relation with permissions TODO
-    private Set<? extends GrantedAuthority> authorities;
+    @ToString.Exclude
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<UserPermission> userPermissions;
 
     @Column(nullable = false)
     private boolean locked = false;
@@ -33,13 +35,10 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean enabled = true;
 
-    private void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
-        this.authorities = Set.copyOf(authorities);
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return userPermissions.stream()
+                .map(UserPermission::toGrantedAuthority).toList();
     }
 
     @Override
