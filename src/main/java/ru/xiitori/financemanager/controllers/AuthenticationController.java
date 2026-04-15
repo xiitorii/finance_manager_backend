@@ -23,7 +23,7 @@ public class AuthenticationController {
     public ResponseEntity<Void> registration(
             @RequestBody @Valid RegistrationDTO registrationDTO
     ) throws AccessDeniedException {
-        if (!userService.existsByUsername(registrationDTO.username())) {
+        if (userService.existsByUsername(registrationDTO.username())) {
             throw new AccessDeniedException("User already exists");
         }
 
