@@ -1,12 +1,15 @@
 package ru.xiitori.financemanager.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import ru.xiitori.financemanager.model.dto.TransactionRequestDTO;
 import ru.xiitori.financemanager.model.dto.TransactionResponseDTO;
+import ru.xiitori.financemanager.model.dto.TransactionUpdateDTO;
+import ru.xiitori.financemanager.model.entity.User;
 import ru.xiitori.financemanager.services.TransactionService;
 
 import java.util.Set;
@@ -32,4 +35,47 @@ public class TransactionController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping()
+    public ResponseEntity<TransactionResponseDTO> createTransaction(
+            @Valid @RequestBody TransactionRequestDTO dto,
+            Authentication authentication
+    ) {
+        var user = (User) authentication.getPrincipal();
+
+        var response = transactionService.create(dto, user);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TransactionResponseDTO> updateTransaction(
+            @RequestBody TransactionUpdateDTO dto,
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        var user = (User) authentication.getPrincipal();
+
+        var response = transactionService.update(dto, id, user);
+
+        return ResponseEntity
+                .ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTransaction(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        var user = (User) auth.getPrincipal();
+
+        transactionService.delete(id, user);
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
 }
