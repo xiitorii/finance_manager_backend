@@ -6,6 +6,7 @@ import ru.xiitori.financemanager.model.dto.TransactionRequestDTO;
 import ru.xiitori.financemanager.model.dto.TransactionResponseDTO;
 import ru.xiitori.financemanager.model.dto.TransactionUpdateDTO;
 import ru.xiitori.financemanager.model.entity.Transaction;
+import ru.xiitori.financemanager.model.enums.TransactionType;
 
 import java.util.Collection;
 import java.util.Set;
@@ -18,11 +19,19 @@ public interface TransactionMapper {
 
     Transaction toEntity(TransactionRequestDTO dto);
 
-    Transaction toEntity(TransactionUpdateDTO dto);
-
     Set<TransactionResponseDTO> toDtoSet(Collection<Transaction> transactions);
 
     Set<Transaction> toEntitySet(Collection<TransactionRequestDTO> dtos);
 
-    void updateEntity(Transaction entity, TransactionUpdateDTO dto);
+    default void updateEntity(Transaction entity, TransactionUpdateDTO dto) {
+        if (dto.description() != null) {
+            entity.setDescription(dto.description());
+        }
+        if (dto.amount() != null) {
+            entity.setAmount(dto.amount());
+        }
+        if (dto.type() != null) {
+            entity.setType(TransactionType.valueOf(dto.type()));
+        }
+    }
 }
