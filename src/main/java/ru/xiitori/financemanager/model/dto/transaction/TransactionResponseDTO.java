@@ -1,4 +1,4 @@
-package ru.xiitori.financemanager.model.dto;
+package ru.xiitori.financemanager.model.dto.transaction;
 
 import ru.xiitori.financemanager.model.enums.TransactionType;
 

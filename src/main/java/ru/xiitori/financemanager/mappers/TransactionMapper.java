@@ -2,9 +2,9 @@ package ru.xiitori.financemanager.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.xiitori.financemanager.model.dto.TransactionRequestDTO;
-import ru.xiitori.financemanager.model.dto.TransactionResponseDTO;
-import ru.xiitori.financemanager.model.dto.TransactionUpdateDTO;
+import ru.xiitori.financemanager.model.dto.transaction.TransactionRequestDTO;
+import ru.xiitori.financemanager.model.dto.transaction.TransactionResponseDTO;
+import ru.xiitori.financemanager.model.dto.transaction.TransactionUpdateDTO;
 import ru.xiitori.financemanager.model.entity.Transaction;
 import ru.xiitori.financemanager.model.enums.TransactionType;
 

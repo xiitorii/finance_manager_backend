@@ -6,9 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import ru.xiitori.financemanager.model.dto.TransactionRequestDTO;
-import ru.xiitori.financemanager.model.dto.TransactionResponseDTO;
-import ru.xiitori.financemanager.model.dto.TransactionUpdateDTO;
+import ru.xiitori.financemanager.model.dto.transaction.TransactionRequestDTO;
+import ru.xiitori.financemanager.model.dto.transaction.TransactionResponseDTO;
+import ru.xiitori.financemanager.model.dto.transaction.TransactionUpdateDTO;
 import ru.xiitori.financemanager.model.entity.User;
 import ru.xiitori.financemanager.services.TransactionService;
 
