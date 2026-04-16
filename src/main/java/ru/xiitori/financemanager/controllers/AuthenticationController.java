@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.xiitori.financemanager.model.dto.auth.LoginDTO;
 import ru.xiitori.financemanager.model.dto.auth.RegistrationDTO;
+import ru.xiitori.financemanager.services.JwtService;
 import ru.xiitori.financemanager.services.UserService;
 
 @RestController
@@ -19,32 +20,42 @@ import ru.xiitori.financemanager.services.UserService;
 public class AuthenticationController {
 
     private final UserService userService;
+    private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("/registration")
-    public ResponseEntity<Void> registration(
-            @RequestBody @Valid RegistrationDTO registrationDTO
+    public ResponseEntity<String> registration(
+            @RequestBody @Valid RegistrationDTO dto
     ) {
-        userService.register(registrationDTO);
+        userService.register(dto);
 
-        return ResponseEntity
-                .ok()
-                .build();
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<Void> login(
-            @RequestBody @Valid LoginDTO dto
-    ) {
-        authenticationManager.authenticate(
+        var auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         dto.username(),
                         dto.password()
                 )
         );
 
+        var jwt = jwtService.generateToken(auth);
+
         return ResponseEntity
-                .ok()
-                .build();
+                .ok(jwt);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(
+            @RequestBody @Valid LoginDTO dto
+    ) {
+        var auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        dto.username(),
+                        dto.password()
+                )
+        );
+
+        var jwt = jwtService.generateToken(auth);
+
+        return ResponseEntity
+                .ok(jwt);
     }
 }
