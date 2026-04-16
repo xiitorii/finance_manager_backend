@@ -11,7 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.xiitori.financemanager.exceptions.AuthorizationException;
 import ru.xiitori.financemanager.mappers.UserMapper;
 import ru.xiitori.financemanager.model.dto.auth.RegistrationDTO;
+import ru.xiitori.financemanager.model.dto.user.UserResponseDTO;
 import ru.xiitori.financemanager.repositories.UserRepository;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,11 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public Set<UserResponseDTO> getAll() {
+        return userRepository.findAll().stream()
+                .map(mapper::toDto).collect(Collectors.toSet());
     }
 
     @Transactional
