@@ -2,6 +2,8 @@ package ru.xiitori.financemanager.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,7 +12,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_permissions")
-@Data
+@Getter
+@Setter
 public class UserPermission {
 
     @Id

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.xiitori.financemanager.model.dto.transaction.TransactionRequestDTO;
@@ -17,6 +18,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/transactions")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class TransactionController {
 
     private final TransactionService transactionService;

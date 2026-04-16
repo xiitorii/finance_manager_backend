@@ -1,14 +1,16 @@
 package ru.xiitori.financemanager.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "permissions")
-@Data
+@Getter
+@Setter
 public class Permission {
 
     @Id
