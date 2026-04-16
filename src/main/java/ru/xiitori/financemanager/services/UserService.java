@@ -1,5 +1,6 @@
 package ru.xiitori.financemanager.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -56,5 +57,31 @@ public class UserService implements UserDetailsService {
         if (!password.equals(repeatPassword)) {
             throw new AuthorizationException("Passwords do not match");
         }
+    }
+
+    public UserResponseDTO getById(Long id) {
+        var entity = userRepository.findById(id)
+                .orElseThrow(EntityNotFoundException::new);
+
+        return mapper.toDto(entity);
+    }
+
+    @Transactional
+    public void changeLock(Long userId, boolean locked) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(EntityNotFoundException::new);
+
+        user.setLocked(locked);
+        userRepository.flush();
+    }
+
+
+    @Transactional
+    public void changeEnabled(Long userId, boolean enabled) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(EntityNotFoundException::new);
+
+        user.setEnabled(enabled);
+        userRepository.flush();
     }
 }
