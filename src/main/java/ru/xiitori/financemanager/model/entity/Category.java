@@ -1,6 +1,7 @@
 package ru.xiitori.financemanager.model.entity;
 
 import jakarta.persistence.*;
+import ru.xiitori.financemanager.model.enums.TransactionType;
 
 import java.util.Set;
 
@@ -21,4 +22,8 @@ public class Category {
 
     @OneToMany(mappedBy = "category")
     private Set<Transaction> transactions;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "transaction_type")
+    private TransactionType transactionType;
 }

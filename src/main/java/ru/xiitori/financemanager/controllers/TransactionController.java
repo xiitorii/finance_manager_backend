@@ -7,12 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import ru.xiitori.financemanager.exceptions.AuthorizationException;
 import ru.xiitori.financemanager.model.dto.transaction.TransactionRequestDTO;
 import ru.xiitori.financemanager.model.dto.transaction.TransactionResponseDTO;
 import ru.xiitori.financemanager.model.dto.transaction.TransactionUpdateDTO;
 import ru.xiitori.financemanager.model.entity.User;
 import ru.xiitori.financemanager.services.TransactionService;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @RestController
@@ -24,9 +26,35 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @GetMapping
-    public ResponseEntity<Set<TransactionResponseDTO>> getAllTransactions() {
+    public ResponseEntity<Set<TransactionResponseDTO>> getAllTransactions(
+            Authentication authentication
+    ) {
+        var user = (User) authentication.getPrincipal();
+
+        if (!authentication.isAuthenticated() || user == null) {
+            throw new AuthorizationException("You are not authorized to access this resource");
+        }
+
+        var transactions = transactionService.getByUser(user);
+
         return ResponseEntity
-                .ok(transactionService.getAll());
+                .ok(transactions);
+    }
+
+    @GetMapping("/period")
+    public ResponseEntity<Set<TransactionResponseDTO>> getTransactionsByPeriod(
+            @RequestParam LocalDateTime startDate,
+            @RequestParam(required = false) LocalDateTime endDate,
+            Authentication authentication
+    ) {
+        var user = (User) authentication.getPrincipal();
+
+        var transactions = transactionService.getByUserAndPeriod(
+                user, startDate, endDate
+        );
+
+        return ResponseEntity
+                .ok(transactions);
     }
 
     @GetMapping("/{id}")

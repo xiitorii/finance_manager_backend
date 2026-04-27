@@ -13,7 +13,9 @@ import ru.xiitori.financemanager.model.entity.Transaction;
 import ru.xiitori.financemanager.model.entity.User;
 import ru.xiitori.financemanager.repositories.TransactionRepository;
 
+import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +35,13 @@ public class TransactionService {
     public Set<TransactionResponseDTO> getAll() {
         var transactions = transactionRepository.findAll();
         return mapper.toDtoSet(transactions);
+    }
+
+    public Set<TransactionResponseDTO> getByUser(User user) {
+        var transactions = transactionRepository.findByUserId(user.getId());
+
+        return transactions.stream()
+                .map(mapper::toDto).collect(Collectors.toSet());
     }
 
     @Transactional
@@ -85,5 +94,17 @@ public class TransactionService {
             throw new AccessDeniedException(
                     "You are not allowed to edit this record");
         }
+    }
+
+    public Set<TransactionResponseDTO> getByUserAndPeriod(User user, LocalDateTime startDate, LocalDateTime endDate) {
+        var transactions = transactionRepository
+                .getAllByUserIdAndCreatedAtBetween(
+                        user.getId(),
+                        startDate,
+                        endDate
+                );
+
+        return transactions.stream()
+                .map(mapper::toDto).collect(Collectors.toSet());
     }
 }
