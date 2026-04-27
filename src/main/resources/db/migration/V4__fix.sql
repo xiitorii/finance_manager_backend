@@ -1,0 +1,3 @@
+ALTER TABLE categories ALTER COLUMN id TYPE BIGINT;
+
+ALTER TABLE transactions ALTER COLUMN category_id TYPE BIGINT;
