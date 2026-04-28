@@ -2,6 +2,8 @@ package ru.xiitori.financemanager.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +16,6 @@ import ru.xiitori.financemanager.model.entity.User;
 import ru.xiitori.financemanager.repositories.TransactionRepository;
 
 import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,23 +25,24 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final TransactionMapper mapper;
 
-    public TransactionResponseDTO getById(Long id) {
-        var optional = transactionRepository.findById(id)
+    public TransactionResponseDTO getById(
+            Long id,
+            User user) {
+        var transaction = transactionRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(EntityNotFoundException::new);
 
-        return mapper.toDto(optional);
+        return mapper.toDto(transaction);
     }
 
-    public Set<TransactionResponseDTO> getAll() {
-        var transactions = transactionRepository.findAll();
-        return mapper.toDtoSet(transactions);
-    }
+    public Page<TransactionResponseDTO> getByUser(
+            User user,
+            Pageable pageable) {
+        var transactions = transactionRepository.findByUserId(
+                user.getId(),
+                pageable
+        );
 
-    public Set<TransactionResponseDTO> getByUser(User user) {
-        var transactions = transactionRepository.findByUserId(user.getId());
-
-        return transactions.stream()
-                .map(mapper::toDto).collect(Collectors.toSet());
+        return transactions.map(mapper::toDto);
     }
 
     @Transactional
@@ -96,15 +97,19 @@ public class TransactionService {
         }
     }
 
-    public Set<TransactionResponseDTO> getByUserAndPeriod(User user, LocalDateTime startDate, LocalDateTime endDate) {
+    public Page<TransactionResponseDTO> getByUserAndPeriod(
+            User user,
+            Pageable pageable,
+            LocalDateTime startDate,
+            LocalDateTime endDate) {
         var transactions = transactionRepository
                 .getAllByUserIdAndCreatedAtBetween(
                         user.getId(),
                         startDate,
-                        endDate
+                        endDate,
+                        pageable
                 );
 
-        return transactions.stream()
-                .map(mapper::toDto).collect(Collectors.toSet());
+        return transactions.map(mapper::toDto);
     }
 }

@@ -7,19 +7,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 import org.springframework.security.access.AccessDeniedException;
 import ru.xiitori.financemanager.mappers.TransactionMapper;
-import ru.xiitori.financemanager.model.dto.transaction.*;
+import ru.xiitori.financemanager.model.dto.transaction.TransactionRequestDTO;
+import ru.xiitori.financemanager.model.dto.transaction.TransactionResponseDTO;
+import ru.xiitori.financemanager.model.dto.transaction.TransactionUpdateDTO;
 import ru.xiitori.financemanager.model.entity.Transaction;
 import ru.xiitori.financemanager.model.entity.User;
 import ru.xiitori.financemanager.repositories.TransactionRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +42,8 @@ public class TransactionServiceTest {
     private TransactionRequestDTO requestDTO;
     private TransactionUpdateDTO updateDTO;
     private TransactionResponseDTO responseDTO;
+    private Pageable pageable;
+    private Page<Transaction> transactionPage;
 
     @BeforeEach
     void setUp() {
@@ -49,66 +54,70 @@ public class TransactionServiceTest {
         transaction.setId(1L);
         transaction.setUser(user);
 
-        requestDTO = new TransactionRequestDTO(
-                new BigDecimal("100.00"),
-                "INCOME",
-                "Test transaction"
-        );
-        updateDTO = new TransactionUpdateDTO(
-                new BigDecimal("200.00"),
-                "EXPENSE",
-                "Updated transaction"
-        );
+        requestDTO = new TransactionRequestDTO(new BigDecimal("100.00"), "INCOME", "Test transaction");
+        updateDTO = new TransactionUpdateDTO(new BigDecimal("200.00"), "EXPENSE", "Updated transaction");
 
-        responseDTO = new TransactionResponseDTO(
-                1L,
-                new BigDecimal("100.00"),
-                ru.xiitori.financemanager.model.enums.TransactionType.INCOME,
-                "Test transaction",
-                java.time.LocalDateTime.now(),
-                java.time.LocalDateTime.now(),
-                1L
-        );
+        responseDTO = new TransactionResponseDTO(1L, new BigDecimal("100.00"), ru.xiitori.financemanager.model.enums.TransactionType.INCOME, "Test transaction", LocalDateTime.now(), LocalDateTime.now(), 1L);
+
+        pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+
+        transactionPage = new PageImpl<>(java.util.List.of(transaction), pageable, 1);
     }
 
     @Test
-    void getById_ShouldReturnTransaction_WhenExists() {
-        when(transactionRepository.findById(1L)).thenReturn(Optional.of(transaction));
+    void getById_ShouldReturnTransaction_WhenExistsAndAccessAllowed() {
+        when(transactionRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(transaction));
         when(transactionMapper.toDto(transaction)).thenReturn(responseDTO);
 
-        TransactionResponseDTO result = transactionService.getById(1L);
+        TransactionResponseDTO result = transactionService.getById(1L, user);
 
         assertNotNull(result);
         assertEquals(1L, result.id());
-        verify(transactionRepository).findById(1L);
+        verify(transactionRepository).findByIdAndUserId(1L, 1L);
         verify(transactionMapper).toDto(transaction);
     }
 
     @Test
     void getById_ShouldThrowEntityNotFoundException_WhenNotExists() {
-        when(transactionRepository.findById(1L)).thenReturn(Optional.empty());
+        when(transactionRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> transactionService.getById(1L));
+        assertThrows(EntityNotFoundException.class, () -> transactionService.getById(1L, user));
 
-        verify(transactionRepository).findById(1L);
+        verify(transactionRepository).findByIdAndUserId(1L, 1L);
         verify(transactionMapper, never()).toDto(any());
     }
 
     @Test
-    void getAll_ShouldReturnAllTransactions() {
-        Set<Transaction> transactions = Set.of(transaction);
-        Set<TransactionResponseDTO> responseDTOs = Set.of(responseDTO);
+    void getByUser_ShouldReturnPagedTransactions() {
+        when(transactionRepository.findByUserId(1L, pageable)).thenReturn(transactionPage);
+        when(transactionMapper.toDto(any(Transaction.class))).thenReturn(responseDTO);
 
-        when(transactionRepository.findAll()).thenReturn(java.util.List.of(transaction));
-        when(transactionMapper.toDtoSet(java.util.List.of(transaction))).thenReturn(responseDTOs);
-
-        Set<TransactionResponseDTO> result = transactionService.getAll();
+        Page<TransactionResponseDTO> result = transactionService.getByUser(user, pageable);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertTrue(result.contains(responseDTO));
-        verify(transactionRepository).findAll();
-        verify(transactionMapper).toDtoSet(java.util.List.of(transaction));
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+        assertEquals(responseDTO, result.getContent().getFirst());
+        verify(transactionRepository).findByUserId(1L, pageable);
+        verify(transactionMapper, times(1)).toDto(transaction);
+    }
+
+    @Test
+    void getByUserAndPeriod_ShouldReturnPagedTransactions() {
+        LocalDateTime startDate = LocalDateTime.now().minusDays(7);
+        LocalDateTime endDate = LocalDateTime.now();
+
+        when(transactionRepository.getAllByUserIdAndCreatedAtBetween(1L, startDate, endDate, pageable)).thenReturn(transactionPage);
+        when(transactionMapper.toDto(any(Transaction.class))).thenReturn(responseDTO);
+
+        Page<TransactionResponseDTO> result = transactionService.getByUserAndPeriod(user, pageable, startDate, endDate);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+        assertEquals(responseDTO, result.getContent().getFirst());
+        verify(transactionRepository).getAllByUserIdAndCreatedAtBetween(1L, startDate, endDate, pageable);
+        verify(transactionMapper, times(1)).toDto(transaction);
     }
 
     @Test
