@@ -1,12 +1,17 @@
 package ru.xiitori.financemanager.model.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import ru.xiitori.financemanager.model.enums.TransactionType;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "categories")
+@Getter
+@Setter
 public class Category {
 
     @Id
